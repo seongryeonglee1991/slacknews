@@ -2,6 +2,7 @@ import requests
 import json
 import xmltodict
 import html
+import os
 from datetime import datetime
 
 # github라는 오픈소스 공간에서 SLACK_WEBHOOK_URL을 암호화하기 위한 코드
