@@ -5,7 +5,7 @@ import html
 import os
 from datetime import datetime
 
-# github라는 오픈소스 공간에서 SLACK_WEBHOOK_URL을 암호화하기 위한 코드.
+# github라는 오픈소스 공간에서 SLACK_WEBHOOK_URL을 암호화하기 위한 코드
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
 
 def makePayloadItem(newsItem):
