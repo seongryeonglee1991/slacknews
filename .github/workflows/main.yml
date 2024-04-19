@@ -1,7 +1,7 @@
-name: Run Rss Webhook Bots
+name: Run RSS Webhook Bots
 on:
   schedule:
-         - cron: "0 */24 * * *"   # 24시간마다 실행
+    - cron: "30 0 * * 1-5"  # UTC 기준 밤 0시 30분, 한국 시간으로는 오전 9시 30분
   push:
     branches: [ main ]
 jobs:
@@ -10,7 +10,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Set up Python 3.x
-              uses: actions/setup-python@v2
+              uses: actions/setup-python@v3
               with:
                   python-version: "3.9"
             - name: Install dependencies
@@ -20,5 +20,6 @@ jobs:
             - name: Run Python Script
               run: |
                   python "program.py"
-              env: # Or as an environment variable
+              env:
                   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
