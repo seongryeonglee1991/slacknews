@@ -2,8 +2,7 @@ name: Run RSS Webhook Bots
 on:
   schedule:
     - cron: "30 0 * * 1-5"  # UTC 기준 밤 0시 30분, 한국 시간으로는 오전 9시 30분
-  push:
-    branches: [ main ]
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -22,4 +21,3 @@ jobs:
                   python "program.py"
               env:
                   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
