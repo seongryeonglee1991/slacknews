@@ -9,19 +9,21 @@ from datetime import datetime
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
 
 def makePayloadItem(newsItem):
-    # 제목에 하이퍼링크 삽입
     제목_하이퍼링크 = f"<{newsItem['link']}|{html.unescape(newsItem['title'])}>"
     pubDate_datetime = datetime.strptime(newsItem['pubDate'], "%a, %d %b %Y %H:%M:%S %Z")
     pubDate_formatted = pubDate_datetime.strftime("%Y년 %m월 %d일 %H:%M")
     return {
-        "type": "section",
         "color": "#ff0044",
-        "title": 제목_하이퍼링크,
-        "fields": [
+        "blocks": [
             {
-                "type": "mrkdwn",
-                "value": f"*{pubDate_formatted}*",
-                "short": True
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{제목_하이퍼링크}\n*{pubDate_formatted}*"
+                }
+            },
+            {
+                "type": "divider"
             }
         ]
     }
@@ -36,10 +38,8 @@ def callWebhook(payload):
 def getNewsFromRss():
     RSS_URLS = [
         'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22%ED%85%8C%EC%9D%B4%EB%B8%94%EC%98%A4%EB%8D%94%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22QR%EC%98%A4%EB%8D%94%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22QR%ED%8E%98%EC%9D%B4%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22KDS%22%20when%3A1d',
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22AI%22%20when%3A1d',
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22blockchain%22%20when%3A1d'
     ]
 
     allNewsList = []
@@ -72,20 +72,15 @@ def main():
     print(f'>>> {newsLen}개의 기사를 수집하였습니다')
 
     print(f'\n\n뉴스 카드 생성을 시작합니다...')
-    cardList = []
+    cardList = {"attachments": []}
     for idx, newsItem in enumerate(newsList):
         item = makePayloadItem(newsItem)
-        cardList.append(item)
-        if idx < newsLen - 1:  # 마지막 기사 뒤에는 구분선을 추가하지 않음
-            cardList.append({"type": "divider"})
+        cardList["attachments"].append(item)
         print(f'>>> [{idx + 1}/{newsLen}] 번째 NEWS CARD를 생성하였습니다.')
 
     print(f'\n\nSLACK 발송을 시작합니다...')
-    initial_message = {
-        "blocks": [
-            {
-                "type": "divider"
-            },
+    callWebhook(
+        {"blocks": [
             {
                 "type": "section",
                 "text": {
@@ -96,10 +91,9 @@ def main():
             {
                 "type": "divider"
             }
-        ]
-    }
-    callWebhook(initial_message)
-    callWebhook({"blocks": cardList})
+        ]}
+    )
+    callWebhook(cardList)
 
 if __name__ == "__main__":
     main()
