@@ -9,31 +9,24 @@ from datetime import datetime
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
 
 def makePayloadItem(newsItem):
-    기사링크 = f"<{newsItem['link']}>"
     제목_하이퍼링크 = f"<{newsItem['link']}|{html.unescape(newsItem['title'])}>"
+    print(f"제목_하이퍼링크: {제목_하이퍼링크}")  # 디버깅 출력
     pubDate_datetime = datetime.strptime(newsItem['pubDate'], "%a, %d %b %Y %H:%M:%S %Z")
     pubDate_formatted = pubDate_datetime.strftime("%Y년 %m월 %d일 %H:%M")
+    print(f"pubDate_formatted: {pubDate_formatted}")  # 디버깅 출력
     return {
         "type": "section",
-        "color": "#ff0044",
-        "fields": [
-            {
-                "type": "mrkdwn",
-                "value": 제목_하이퍼링크,
-                "short": False
-            },
-            {
-                "type": "mrkdwn",
-                "value": f"{pubDate_formatted}",
-                "short": True
-            }
-        ]
+        "text": {
+            "type": "mrkdwn",
+            "text": f"{제목_하이퍼링크}\n*{pubDate_formatted}*"
+        }
     }
 
 def callWebhook(payload):
     headers = {
         'Content-type': 'application/json',
     }
+    print(f"Payload: {json.dumps(payload, indent=2)}")  # 디버깅 출력
     res = requests.post(SLACK_WEBHOOK_URL, headers=headers, json=payload)
     print(res.text)
 
@@ -67,6 +60,7 @@ def getNewsFromRss():
         except Exception as e:
             print(f"뉴스 파싱 중 오류 발생 ({RSS_URL}): {e}")
 
+    print(f"수집된 뉴스 기사 수: {len(allNewsList)}")  # 디버깅 출력
     return allNewsList
 
 def main():
@@ -94,7 +88,7 @@ def main():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*오늘 업계 뉴스*"
+                    "text": "*오늘 테이블오더 뉴스*"
                 }
             },
             {
