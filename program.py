@@ -66,18 +66,17 @@ def main():
     print(f'>>> {newsLen}개의 기사를 수집하였습니다')
 
     print(f'\n\n뉴스 카드 생성을 시작합니다...')
-    cardList = dict()
-    cardList['blocks'] = []
+    cardList = []
     for idx, newsItem in enumerate(newsList):
         item = makePayloadItem(newsItem)
-        cardList['blocks'].append(item)
+        cardList.append(item)
         if idx < newsLen - 1:  # 마지막 기사 뒤에는 구분선을 추가하지 않음
-            cardList['blocks'].append({"type": "divider"})
+            cardList.append({"type": "divider"})
         print(f'>>> [{idx + 1}/{newsLen}] 번째 NEWS CARD를 생성하였습니다.')
 
     print(f'\n\nSLACK 발송을 시작합니다...')
-    callWebhook(
-        {'blocks': [
+    initial_message = {
+        "blocks": [
             {
                 "type": "divider"
             },
@@ -85,15 +84,16 @@ def main():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*오늘 업계 뉴스*"
+                    "text": "*오늘 테이블오더 뉴스*"
                 }
             },
             {
                 "type": "divider"
-            },
-        ]}
-    )
-    callWebhook(cardList)
+            }
+        ]
+    }
+    callWebhook(initial_message)
+    callWebhook({"blocks": cardList})
 
 if __name__ == "__main__":
     main()
