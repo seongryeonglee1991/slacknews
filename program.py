@@ -9,15 +9,25 @@ from datetime import datetime
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
 
 def makePayloadItem(newsItem):
+    기사링크 = f"<{newsItem['link']}>"
     제목_하이퍼링크 = f"<{newsItem['link']}|{html.unescape(newsItem['title'])}>"
     pubDate_datetime = datetime.strptime(newsItem['pubDate'], "%a, %d %b %Y %H:%M:%S %Z")
     pubDate_formatted = pubDate_datetime.strftime("%Y년 %m월 %d일 %H:%M")
     return {
         "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": f"{제목_하이퍼링크}\n*{pubDate_formatted}*"
-        }
+        "color": "#ff0044",
+        "fields": [
+            {
+                "type": "mrkdwn",
+                "value": 제목_하이퍼링크,
+                "short": False
+            },
+            {
+                "type": "mrkdwn",
+                "value": f"{pubDate_formatted}",
+                "short": True
+            }
+        ]
     }
 
 def callWebhook(payload):
@@ -84,7 +94,7 @@ def main():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*오늘 테이블오더 뉴스*"
+                    "text": "*오늘 업계 뉴스*"
                 }
             },
             {
