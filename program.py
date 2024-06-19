@@ -12,7 +12,7 @@ def makePayloadItem(newsItem):
     제목_하이퍼링크 = f"<{newsItem['link']}|{html.unescape(newsItem['title'])}>"
     pubDate_datetime = datetime.strptime(newsItem['pubDate'], "%a, %d %b %Y %H:%M:%S %Z")
     pubDate_formatted = pubDate_datetime.strftime("%Y년 %m월 %d일 %H:%M")
-    return {
+    payload_item = {
         "color": "#ff0044",
         "blocks": [
             {
@@ -27,19 +27,27 @@ def makePayloadItem(newsItem):
             }
         ]
     }
+    print(f"Payload item created: {payload_item}")  # Debugging print statement
+    return payload_item
 
 def callWebhook(payload):
     headers = {
         'Content-type': 'application/json',
     }
-    res = requests.post(SLACK_WEBHOOK_URL, headers=headers, json=payload)
-    print(res.text)
+    try:
+        res = requests.post(SLACK_WEBHOOK_URL, headers=headers, json=payload)
+        print(f"Webhook response: {res.text}")  # Debugging print statement
+        res.raise_for_status()  # Raise an HTTPError for bad responses
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending webhook: {e}")
 
 def getNewsFromRss():
     RSS_URLS = [
         'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22%ED%85%8C%EC%9D%B4%EB%B8%94%EC%98%A4%EB%8D%94%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22AI%22%20when%3A1d',
-        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22blockchain%22%20when%3A1d'
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22%ED%82%A4%EC%98%A4%EC%8A%A4%ED%81%AC%22%20when%3A1d',
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22QR%EC%98%A4%EB%8D%94%22%20when%3A1d',
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22QR%ED%8E%98%EC%9D%B4%22%20when%3A1d',
+        'https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR%3Ako&oc=11&q=%22KDS%22%20when%3A1d',
     ]
 
     allNewsList = []
@@ -79,13 +87,14 @@ def main():
         print(f'>>> [{idx + 1}/{newsLen}] 번째 NEWS CARD를 생성하였습니다.')
 
     print(f'\n\nSLACK 발송을 시작합니다...')
+    # Initial message
     callWebhook(
         {"blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*오늘 테이블오더 뉴스*"
+                    "text": "*오늘 업계 뉴스*"
                 }
             },
             {
@@ -93,7 +102,11 @@ def main():
             }
         ]}
     )
-    callWebhook(cardList)
+    # News cards
+    if cardList["attachments"]:
+        callWebhook(cardList)
+    else:
+        print(">>> 뉴스 카드가 생성되지 않았습니다.")
 
 if __name__ == "__main__":
     main()
