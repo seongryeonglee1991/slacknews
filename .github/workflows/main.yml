@@ -1,7 +1,7 @@
 name: Run RSS Webhook Bots
 on:
   schedule:
-    - cron: "30 0 * * 1-5"  # UTC 기준 밤 0시 30분, 한국 시간으로는 오전 9시 30분
+    - cron: "0 0 * * 1-5"  # UTC 기준 오전 0시, 한국 시간으로 오전 9시
   workflow_dispatch:  # 수동 트리거를 위한 이벤트 추가
 
 jobs:
