@@ -4,14 +4,26 @@ import xmltodict
 import html
 import os
 from datetime import datetime
+from transformers import pipeline
 
 # GitHub Secrets에서 환경 변수 가져오기
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL')
+
+# Summarization pipeline
+summarizer = pipeline("summarization")
 
 def makePayloadItem(newsItem):
     제목_하이퍼링크 = f"<{newsItem['link']}|{html.unescape(newsItem['title'])}>"
     pubDate_datetime = datetime.strptime(newsItem['pubDate'], "%a, %d %b %Y %H:%M:%S %Z")
     pubDate_formatted = pubDate_datetime.strftime("%Y년 %m월 %d일 %H:%M")
+
+    # 본문 내용 요약
+    본문 = newsItem.get('description', '본문 없음')
+    try:
+        요약된_본문 = summarizer(본문, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
+    except Exception as e:
+        요약된_본문 = "본문 요약 실패"
+
     payload_item = {
         "color": "#ff0044",
         "blocks": [
@@ -19,7 +31,7 @@ def makePayloadItem(newsItem):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{제목_하이퍼링크}\n*{pubDate_formatted}*"
+                    "text": f"{제목_하이퍼링크}\n*{pubDate_formatted}*\n\n{요약된_본문}"
                 }
             },
             {
@@ -65,7 +77,8 @@ def getNewsFromRss():
                 news_dict = {
                     'title': item['title'],
                     'link': item['link'],
-                    'pubDate': item['pubDate']
+                    'pubDate': item['pubDate'],
+                    'description': item.get('description', '본문 없음')  # 본문 내용 가져오기
                 }
                 allNewsList.append(news_dict)
         except Exception as e:
