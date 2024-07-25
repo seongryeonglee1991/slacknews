@@ -9,17 +9,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 레포지토리 체크아웃
       - uses: actions/checkout@v4  # 최신 버전으로 업데이트
+
+      # Python 3.x 설정
       - name: Set up Python 3.x
         uses: actions/setup-python@v4  # 최신 버전으로 업데이트
         with:
           python-version: "3.9"
+
+      # CUPS 개발 파일 설치
       - name: Install CUPS development files
         run: sudo apt-get update && sudo apt-get install -y libcups2-dev
+
+      # 의존성 설치
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip check  # 패키지 호환성 검사
+
+      # Python 스크립트 실행
       - name: Run Python Script
         run: |
           python "program.py"
